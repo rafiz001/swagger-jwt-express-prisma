@@ -8,7 +8,6 @@ const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const auth_routes_1 = __importDefault(require("./routes/auth.routes"));
-const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
 const swagger_spec_1 = __importDefault(require("./swagger.spec"));
 // Load environment variables
 dotenv_1.default.config();
@@ -16,15 +15,91 @@ const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3000;
 app.use((0, cors_1.default)());
 // Other middleware
-app.use((0, helmet_1.default)());
+// app.use(helmet())
+app.use((0, helmet_1.default)({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: [
+                "'self'",
+                "'unsafe-inline'", // Required for inline Swagger UI script
+                "https://cdn.jsdelivr.net", // Allow CDN scripts
+                "https://unpkg.com" // Alternative CDN
+            ],
+            styleSrc: [
+                "'self'",
+                "'unsafe-inline'", // Required for inline styles
+                "https://cdn.jsdelivr.net",
+                "https://fonts.googleapis.com",
+                "https://unpkg.com"
+            ],
+            fontSrc: [
+                "'self'",
+                "https://fonts.gstatic.com",
+                "https://cdn.jsdelivr.net",
+                "https://unpkg.com",
+                "data:" // Required for Swagger UI fonts
+            ],
+            imgSrc: [
+                "'self'",
+                "data:", // Required for Swagger UI images
+                "https://cdn.jsdelivr.net",
+                "https://unpkg.com"
+            ],
+            connectSrc: [
+                "'self'",
+                "https://cdn.jsdelivr.net",
+                "https://unpkg.com"
+            ]
+        }
+    },
+    crossOriginEmbedderPolicy: false, // Disable for Swagger UI
+    crossOriginResourcePolicy: { policy: "cross-origin" } // Allow cross-origin resources
+}));
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 // Swagger UI
-app.use('/api/api-docs', swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swagger_spec_1.default, {
-    explorer: true,
-    customCss: '.swagger-ui .topbar { display: none }',
-    customSiteTitle: 'Authentication API Documentation'
-}));
+// Serve static HTML with inline Swagger UI
+app.get('/api/api-docs', (req, res) => {
+    const html = `
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.11.0/swagger-ui.css" />
+    <style>
+      body { margin: 0; padding: 0; }
+      #swagger-ui { padding: 20px; }
+      .swagger-ui .topbar { display: none; }
+    </style>
+  </head>
+  <body>
+    <div id="swagger-ui"></div>
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.11.0/swagger-ui-bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.11.0/swagger-ui-standalone-preset.js"></script>
+    <script>
+      const spec = ${JSON.stringify(swagger_spec_1.default, null, 2)};
+      
+      window.onload = () => {
+        window.ui = SwaggerUIBundle({
+          spec,
+          dom_id: '#swagger-ui',
+          deepLinking: true,
+          presets: [
+            SwaggerUIBundle.presets.apis,
+            SwaggerUIStandalonePreset
+          ],
+          layout: "StandaloneLayout"
+        });
+      };
+    </script>
+  </body>
+  </html>
+  `;
+    res.send(html);
+});
 // Serve Swagger JSON specification
 app.get('/api-docs.json', (req, res) => {
     res.setHeader('Content-Type', 'application/json');

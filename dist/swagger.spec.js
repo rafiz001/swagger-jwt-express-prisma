@@ -21,7 +21,7 @@ const swaggerSpec = {
             description: 'Development server'
         },
         {
-            url: 'https://api.example.com/api',
+            url: 'https://swagger-jwt-express-prisma.vercel.app/api',
             description: 'Production server'
         }
     ],
