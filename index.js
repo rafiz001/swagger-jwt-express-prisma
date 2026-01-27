@@ -25,7 +25,7 @@ const swaggerOptions = {
         description: "local"
       },
       {
-        url: "http://localhost:4000",
+        url: "http://swagger-jwt-express-sqlite.versel.app",
         description: "live"
       },
     ],
