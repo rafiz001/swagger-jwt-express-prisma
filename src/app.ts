@@ -5,6 +5,8 @@ import dotenv from 'dotenv'
 import authRoutes from './routes/auth.routes'
 
 import swaggerSpec from './swagger.spec'
+process.env.TZ = "Asia/Dhaka"
+
 
 // Load environment variables
 dotenv.config()
