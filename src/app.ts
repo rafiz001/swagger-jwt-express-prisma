@@ -3,8 +3,9 @@ import cors from 'cors'
 import helmet from 'helmet'
 import dotenv from 'dotenv'
 import authRoutes from './routes/auth.routes'
-
 import swaggerSpec from './swagger.spec'
+
+
 process.env.TZ = "Asia/Dhaka"
 
 
@@ -124,7 +125,6 @@ app.get('/health', (req, res) => {
 })
 app.get('/',(req,res)=>{
   let d = new Date()
-  d.toLocaleTimeString()
   res.json({
     timeUTC: d,
     timeDhaka: d.toString()
