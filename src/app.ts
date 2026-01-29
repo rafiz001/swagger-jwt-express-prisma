@@ -120,6 +120,14 @@ app.get('/health', (req, res) => {
     service: 'Auth API'
   })
 })
+app.get('/',(req,res)=>{
+  let d = new Date()
+  d.toLocaleTimeString()
+  res.json({
+    timeUTC: d,
+    timeDhaka: d.toString()
+  })
+})
 /*
 // 404 handler
 app.use('*', (req, res) => { 
